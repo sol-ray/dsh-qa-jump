@@ -41,11 +41,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zhangjietest666/dsh-qa-jump.git"
+    "url": "git+https://github.com/sol-ray/dsh-qa-jump.git"
   },
-  "homepage": "https://github.com/zhangjietest666/dsh-qa-jump",
+  "homepage": "https://github.com/sol-ray/dsh-qa-jump",
   "bugs": {
-    "url": "https://github.com/zhangjietest666/dsh-qa-jump/issues"
+    "url": "https://github.com/sol-ray/dsh-qa-jump/issues"
   },
   "dsh": {
     "bundle": { "patch": "./cordis.patch.yml" },

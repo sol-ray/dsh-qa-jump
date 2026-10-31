@@ -16,7 +16,10 @@
 
 ```bash
 # 按你的运行方式选 profile（web / desktop）
-dsh plugin --profile web add github:zhangjietest666/dsh-qa-jump
+dsh plugin --profile web add github:sol-ray/dsh-qa-jump
+
+# 或直接用预构建 tarball（免构建，当前版本 1.6.4）
+dsh plugin --profile web add https://github.com/sol-ray/dsh-qa-jump/releases/download/v1.6.4/dsh-qa-jump-1.6.4.tgz
 ```
 
 装完重启 DSH（或刷新 Web GUI），输入框上方出现那行按钮。

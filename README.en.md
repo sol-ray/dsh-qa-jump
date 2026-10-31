@@ -15,7 +15,10 @@ A one-row navigation bar for the **DeepSeek Harness (DSH) Web GUI**, built for l
 ## Install
 
 ```bash
-dsh plugin --profile web add github:zhangjietest666/dsh-qa-jump
+dsh plugin --profile web add github:sol-ray/dsh-qa-jump
+
+# or the prebuilt tarball (current version 1.6.4, no build step)
+dsh plugin --profile web add https://github.com/sol-ray/dsh-qa-jump/releases/download/v1.6.4/dsh-qa-jump-1.6.4.tgz
 ```
 
 Restart DSH (or reload the Web GUI); the row appears above the composer.
