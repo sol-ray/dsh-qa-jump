@@ -205,13 +205,11 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Answer start rows: a "回答" is the model output of one turn, i.e. the
-     * first assistant message row after each user/steering row.
-     *
-     * Reading flow rows directly is what keeps the landing point at the
-     * beginning of the reply: the per-message action anchors live in the
-     * turn-tail row, where the "已编辑 N 个文件" summary is, so scrolling to an
-     * anchor lands at the END of the answer.
+     * Answer start rows: a "回答" is the output block of one turn, so the target
+     * is the FIRST flow row after each user/steering row — deliberately not the
+     * assistant message row. In the shell that first row is the turn summary
+     * line ("已完成，用时 N 秒"), which sits above the reply body; anchoring on
+     * the message row scrolls that line off the top of the viewport.
      */
     function readAnswerRows() {
       const answers = [];
@@ -222,10 +220,9 @@ window.__ModuleLoader__.load({
           armed = true;
           continue;
         }
-        if (kind === "assistant-step" && armed) {
-          answers.push(row);
-          armed = false;
-        }
+        if (!armed) continue;
+        answers.push(row);
+        armed = false;
       }
       if (answers.length) return answers;
       // Fallback for a shell that renames the kind: the old anchor mapping.

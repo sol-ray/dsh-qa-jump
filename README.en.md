@@ -7,7 +7,7 @@ A one-row navigation bar for the **DeepSeek Harness (DSH) Web GUI**, built for l
 ```
 
 - **Two axes**: switch between *Question* and *Answer*, then jump to the **start** of the previous/next one.
-- **Answers start at the reply**, not at the turn tail where the “edited N files” summary lives.
+- **Answers start at the reply**: the landing point is the turn's first output row, so the “已完成，用时 N 秒” summary line stays visible — not the turn tail where the “edited N files” summary lives.
 - **Boundaries still act**: with a single answer, the button parks that answer at the top; the “already at the last answer” hint only appears once it really is there.
 - **Code folding**: fold/unfold code blocks in replies (click one block to reopen it while folded). The icon shows the state: a full-height frame when open, a squashed frame when folded.
 - **One row, mobile friendly**: `nowrap` layout plus narrow-screen and coarse-pointer breakpoints, fits 320px; `touch-action: manipulation` on buttons.
