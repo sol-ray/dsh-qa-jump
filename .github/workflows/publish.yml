@@ -1,0 +1,42 @@
+name: Publish
+
+# Publishes dsh-qa-jump to npmjs via a Trusted Publisher (OIDC).
+# No NODE_AUTH_TOKEN / NPM_TOKEN is used: authentication comes from the
+# GitHub Actions OIDC identity that the npm package is configured to trust.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+# id-token: write is what lets npm exchange an OIDC token for publish rights.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing needs npm >= 11.5.1 and Node >= 22.14.0.
+      # Node 22 ships npm 10.x, which cannot do OIDC auth, so upgrade first.
+      - name: Upgrade npm for OIDC trusted publishing
+        run: |
+          npm install -g npm@latest
+          node --version
+          npm --version
+
+      # Pure JS plugin, no build step; a syntax check is the whole gate.
+      - name: Syntax check
+        run: node --check client.js
+
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public

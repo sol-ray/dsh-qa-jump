@@ -89,6 +89,42 @@ locale/            # 插件页标题/描述（zh / en）
 icon.svg           # 图标
 ```
 
+## 发布 / Release
+
+发版走 GitHub Actions + **npm Trusted Publisher（OIDC）**，不需要 OTP，也不需要长期 token。
+
+**触发方式**：推一个 `v*` 形式的 tag（打在 main 上），或者到 Actions 页面手动 `Run workflow`。
+
+```bash
+git tag v1.6.5
+git push origin v1.6.5
+```
+
+workflow 在 `.github/workflows/publish.yml`：`permissions` 为 `contents: read` + `id-token: write`，Node 22，`npm publish --provenance --access public`。**不设置 `NODE_AUTH_TOKEN`**——认证完全来自 OIDC 身份。
+
+**一次性配置**（在 npmjs.com 上做一次即可）：
+
+1. **先让包在 registry 上存在。** npm 目前**不支持**给「还没发布过的包」预配 Trusted Publisher（依据见下），所以第一个版本必须手动发或用 token 发：
+   - 2FA 开着：`npm publish --otp=<6 位动态码>`；
+   - 或者临时建一个带 **bypass 2FA** 的 granular token，发一次后立刻撤销。
+2. 打开 `https://www.npmjs.com/package/dsh-qa-jump` → **Settings** → **Trusted publishing** → **Add trusted publisher** → **GitHub Actions**，填：
+
+   | 字段 | 值 |
+   |---|---|
+   | Organization or user | `sol-ray` |
+   | Repository | `dsh-qa-jump` |
+   | Workflow filename | `publish.yml`（只写文件名、不要路径，必须带 `.yml`） |
+   | Environment name | 留空 |
+   | Allowed actions | **勾选 `npm publish`** |
+
+3. 两个容易踩的坑：
+   - **Allowed actions 必须勾 `npm publish`**。2026-09-03 之后新建的配置默认只允许 `npm stage publish`，不勾这项 workflow 会被拒。
+   - 新建的 Trusted Publisher 配置必须**在 48 小时内完成首次发布**才算校验通过并绑定，否则过期作废（只能删掉重建）。配完尽快推 tag。
+
+> **关于「包还没发布过时，能不能先配 Trusted Publisher」**
+> 结论：**不能**，首个版本必须先在 npm 上发布一次（手动或用 token），之后才能配 OIDC。理由和来源：
+> 配置入口挂在包自己的 Settings 页上，包在 registry 上不存在就没有那个页面。npm CLI 仓库的 issue [npm/cli#8544 "Allow publishing initial version with OIDC"](https://github.com/npm/cli/issues/8544) 至今仍是 **open**，npm 维护者在 2025-09-05 的评论里明确说 MVP 阶段**故意不做** first publish over OIDC、正在评估后续支持；到 2026-08-05 仍有用户在追问进展，说明尚未实现。官方文档 [Trusted publishing](https://docs.npmjs.com/trusted-publishers) 的 Step 1 也是从「Navigate to your package settings」讲起，同样预设包已存在。若 npm 之后补上这个能力，以 npmjs.com 界面为准。
+
 ## License
 
 MIT
