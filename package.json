@@ -1,0 +1,58 @@
+{
+  "name": "dsh-qa-jump",
+  "version": "1.6.3",
+  "description": "DeepSeek Harness Web 插件：提问/回答双轴跳转 + 代码块一键折叠。Question/answer navigation and code folding for the DSH conversation view.",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "dsh.plugin.json",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.en.md",
+    "LICENSE"
+  ],
+  "icon": "./icon.svg",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "navigation",
+    "question",
+    "answer",
+    "code-fold",
+    "chat"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18",
+    "dsh": ">=0.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhangjietest666/dsh-qa-jump.git"
+  },
+  "homepage": "https://github.com/zhangjietest666/dsh-qa-jump",
+  "bugs": {
+    "url": "https://github.com/zhangjietest666/dsh-qa-jump/issues"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-ui-conversation"]
+    }
+  }
+}

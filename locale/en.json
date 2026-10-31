@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Answer Jump",
+    "description": "One navigation row above the composer: switch Question/Answer and jump to the start of the previous or next one, plus fold or unfold code blocks in replies (click a single block to open it while folded)."
+  }
+}
