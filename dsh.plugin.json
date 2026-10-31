@@ -1,6 +1,6 @@
 {
   "id": "dsh-external/dsh-qa-jump",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "main": "./index.js",
   "description": "提问/回答双轴跳转与代码块折叠：输入框上方一行，在「提问 / 回答」之间切换并跳到对应条目开头，支持一键折叠代码块。Question/answer jump and code folding for the DSH conversation view.",
   "engines": {
