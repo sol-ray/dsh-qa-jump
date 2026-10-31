@@ -125,6 +125,13 @@ workflow 在 `.github/workflows/publish.yml`：`permissions` 为 `contents: read
 > 结论：**不能**，首个版本必须先在 npm 上发布一次（手动或用 token），之后才能配 OIDC。理由和来源：
 > 配置入口挂在包自己的 Settings 页上，包在 registry 上不存在就没有那个页面。npm CLI 仓库的 issue [npm/cli#8544 "Allow publishing initial version with OIDC"](https://github.com/npm/cli/issues/8544) 至今仍是 **open**，npm 维护者在 2025-09-05 的评论里明确说 MVP 阶段**故意不做** first publish over OIDC、正在评估后续支持；到 2026-08-05 仍有用户在追问进展，说明尚未实现。官方文档 [Trusted publishing](https://docs.npmjs.com/trusted-publishers) 的 Step 1 也是从「Navigate to your package settings」讲起，同样预设包已存在。若 npm 之后补上这个能力，以 npmjs.com 界面为准。
 
+**已实测验证（2026-10-31）**：
+
+- `1.6.4` 是首个版本，因包还不存在，用临时 bypass-2FA token 手动发布（`npm publish`）；发布后那次 token 即撤销。
+- `1.6.5` 起全部由本 workflow 发布：推 `v1.6.5` tag → run [41207597381](https://github.com/sol-ray/dsh-qa-jump/actions/runs/41207597381) 全部 step 成功 → registry 上 `1.6.5` 带 provenance，attestation 解码结果为
+  `predicateType: slsa.dev/provenance/v1`、`workflow: .github/workflows/publish.yml`、`source: git+https://github.com/sol-ray/dsh-qa-jump@refs/tags/v1.6.5`、`gitCommit: 9dc9f61`。
+- 首发之后 npm 需要约 1–2 分钟索引延迟，`registry.npmjs.org/<pkg>/<version>` 才会从 404 变成 200。
+
 ## License
 
 MIT

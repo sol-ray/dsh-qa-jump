@@ -106,6 +106,12 @@ The workflow lives in `.github/workflows/publish.yml`: `permissions` are `conten
 > **Can a Trusted Publisher be configured before the package has ever been published?**
 > No. Version one has to land on npm first (manually or with a token); only then can OIDC be configured. The settings entry point lives on the package's own Settings page, which simply does not exist until the package does. The npm CLI issue [npm/cli#8544 "Allow publishing initial version with OIDC"](https://github.com/npm/cli/issues/8544) is still **open**: an npm maintainer stated on 2025-09-05 that first publish over OIDC was deliberately left out of the MVP and is being evaluated, and users were still asking for status on 2026-08-05. The official [Trusted publishing](https://docs.npmjs.com/trusted-publishers) docs likewise start at "Navigate to your package settings", assuming the package already exists. If npm ships this later, the npmjs.com UI is the source of truth.
 
+**Verified on 2026-10-31**:
+
+- `1.6.4` was the first version; since the package did not exist yet it was published manually with a temporary bypass-2FA token, which was revoked right after.
+- From `1.6.5` on, releases come from this workflow: pushing the `v1.6.5` tag → run [41207597381](https://github.com/sol-ray/dsh-qa-jump/actions/runs/41207597381) succeeded on every step → the registry entry for `1.6.5` carries a provenance attestation that decodes to `predicateType: slsa.dev/provenance/v1`, `workflow: .github/workflows/publish.yml`, `source: git+https://github.com/sol-ray/dsh-qa-jump@refs/tags/v1.6.5`, `gitCommit: 9dc9f61`.
+- After a brand-new version is published, npm needs about 1–2 minutes before `registry.npmjs.org/<pkg>/<version>` stops returning 404.
+
 ## License
 
 MIT
