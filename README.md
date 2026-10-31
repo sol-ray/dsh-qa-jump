@@ -12,6 +12,16 @@
 - **代码块折叠**：一键折叠/展开回答里的代码块（折叠后点单个代码块可单独展开），图标用“完整长框 ↔ 压扁短框”区分状态。
 - **一行显示、移动端友好**：`flex-wrap: nowrap` + 窄屏/粗指针断点，320px 宽也能放下；按钮 `touch-action: manipulation`。
 
+## 截图
+
+控件行（「提问 / 回答」双轴，`17/17` 表示当前在最后一条）：
+
+![控件行](https://raw.githubusercontent.com/sol-ray/dsh-qa-jump/main/docs/control-row.png)
+
+折叠代码后的状态（图标变成压扁的短框，并给出“点击代码块可单独展开”的提示）：
+
+![折叠代码](https://raw.githubusercontent.com/sol-ray/dsh-qa-jump/main/docs/code-folded.png)
+
 ## 安装
 
 ```bash
@@ -60,7 +70,7 @@ dsh plugin --profile web remove dsh-qa-jump
 - 依赖上述 DOM 钩子；上游若重命名 kind，回答轴会退回锚点映射（仍可用，但粒度变粗），其余功能不受影响。
 - 代码折叠作用于围栏代码块内部的 `<pre>`（`md-code-block` 内），语言标签与复制按钮保留。
 - 流式输出期间新回答尚未产生 `assistant-step` 末尾动作行也不影响提问轴；回答轴按 flow 行即时计算，流式中即可跳。
-- 未提供截图：视觉验证需在已登录的 Web GUI 中进行，仓库内不放置未经核实的截图。
+- 截图取自本机实际运行（DSH 0.2.1-rc.5 / Windows 桌面端、深色主题），只覆盖控件行本身；代码块折叠对正文的效果未截图。
 
 ## 开发
 
