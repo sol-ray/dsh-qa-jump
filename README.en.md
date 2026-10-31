@@ -25,10 +25,11 @@ With code folded (the icon becomes a squashed frame and the hint appears):
 ## Install
 
 ```bash
-dsh plugin --profile web add github:sol-ray/dsh-qa-jump
+# recommended: install from npm (no build step, no build approval)
+dsh plugin --profile web add dsh-qa-jump
 
-# or the prebuilt tarball (current version 1.6.4, no build step)
-dsh plugin --profile web add https://github.com/sol-ray/dsh-qa-jump/releases/download/v1.6.4/dsh-qa-jump-1.6.4.tgz
+# or from the GitHub source
+dsh plugin --profile web add github:sol-ray/dsh-qa-jump
 ```
 
 Restart DSH (or reload the Web GUI); the row appears above the composer.

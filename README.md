@@ -25,11 +25,11 @@
 ## 安装
 
 ```bash
-# 按你的运行方式选 profile（web / desktop）
-dsh plugin --profile web add github:sol-ray/dsh-qa-jump
+# 推荐：从 npm 安装（免构建、免构建授权）
+dsh plugin --profile web add dsh-qa-jump
 
-# 或直接用预构建 tarball（免构建，当前版本 1.6.4）
-dsh plugin --profile web add https://github.com/sol-ray/dsh-qa-jump/releases/download/v1.6.4/dsh-qa-jump-1.6.4.tgz
+# 或者从 GitHub 源码安装
+dsh plugin --profile web add github:sol-ray/dsh-qa-jump
 ```
 
 装完重启 DSH（或刷新 Web GUI），输入框上方出现那行按钮。
