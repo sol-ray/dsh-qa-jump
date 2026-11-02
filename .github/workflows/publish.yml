@@ -1,6 +1,7 @@
 name: Publish
 
-# Publishes dsh-qa-jump to npmjs via a Trusted Publisher (OIDC).
+# Publishes dsh-qa-jump to npmjs via a Trusted Publisher (OIDC) and mirrors the
+# same tarball into a GitHub Release for the tag.
 # No NODE_AUTH_TOKEN / NPM_TOKEN is used: authentication comes from the
 # GitHub Actions OIDC identity that the npm package is configured to trust.
 
@@ -11,8 +12,9 @@ on:
   workflow_dispatch:
 
 # id-token: write is what lets npm exchange an OIDC token for publish rights.
+# contents: write is what lets the job create the GitHub Release.
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
@@ -40,3 +42,29 @@ jobs:
 
       - name: Publish to npm with provenance
         run: npm publish --provenance --access public
+
+      # The Release carries the exact tarball that was just published, so the
+      # `releases/download/<tag>/dsh-qa-jump-<version>.tgz` install URL works.
+      - name: Pack the release tarball
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npm pack --pack-destination "$RUNNER_TEMP"
+
+      - name: Create the GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          tarball="$(ls "$RUNNER_TEMP"/dsh-qa-jump-*.tgz)"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # Re-running the workflow must neither fail nor lose the asset.
+            echo "release $tag already exists; refreshing its asset"
+            gh release upload "$tag" "$tarball" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$tag" "$tarball" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "dsh-qa-jump $tag" \
+              --generate-notes \
+              --latest
+          fi
