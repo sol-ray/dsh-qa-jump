@@ -21,6 +21,13 @@
  * Everything is derived at click/scroll time from the live DOM, so streaming
  * output, newly created rows, and session switches need no special case:
  * React mounts/unmounts the anchors and the registry follows.
+ *
+ * One exception is the shell's tail-follow: while the model is still writing,
+ * the shell owns the scrollport and re-parks it at the floor on every content
+ * growth, which cancels a smooth scroll the moment it starts. A jump that
+ * happens in that state therefore parks the row in the same task and then
+ * reports a settled reader position, so the shell hands the scrollport back
+ * (see `jumpToTop`).
  */
 window.__ModuleLoader__.load({
   id: "dsh-qa-jump",
@@ -47,6 +54,12 @@ window.__ModuleLoader__.load({
     /** Gap kept above the landing row, in px. */
     const TOP_GAP = 12;
     /**
+     * The shell marks its Chat root while it is pinning the scrollport to the
+     * tail, i.e. while a response is still being streamed in. In that state the
+     * shell owns the offset: every content growth re-parks it at the floor.
+     */
+    const FOLLOW_ATTR = "[data-chat-following-tail]";
+    /**
      * A row counts as "current" when its start is at most this far below the
      * scrollport top. Kept well above TOP_GAP so that a smooth scroll settling a
      * pixel or two off cannot demote the row we just jumped to.
@@ -54,6 +67,8 @@ window.__ModuleLoader__.load({
     const TOP_TOLERANCE = 40;
     /** How long a scheduled jump overrides the measured position, in ms. */
     const PENDING_MS = 800;
+    /** Identifies the newest jump, so an older landing guard cannot win over it. */
+    let holdToken = 0;
 
     const ZH = {
       group: "提问与回答跳转",
@@ -369,6 +384,70 @@ window.__ModuleLoader__.load({
       }
     }
 
+    /** Whether the shell is currently pinning the scrollport to the tail. */
+    function followingTail(scroller) {
+      if (!scroller || typeof scroller.querySelector !== "function") return false;
+      return scroller.querySelector(FOLLOW_ATTR) !== null;
+    }
+
+    /**
+     * Report a settled reader position to the shell.
+     *
+     * The shell only learns that the tail no longer owns the scrollport from a
+     * scroll it attributes to the reader: `scroll` arms its reader sample and
+     * `scrollend` settles that sample immediately instead of after its 500 ms
+     * window. Both are plain DOM events, so dispatching them is the public way
+     * to hand the scrollport back without waiting for the next chunk.
+     */
+    function releaseTail(scroller) {
+      try {
+        scroller.dispatchEvent(new Event("scroll"));
+        scroller.dispatchEvent(new Event("scrollend"));
+      } catch (error) {
+        console.error("[answer-jump] tail release", error);
+      }
+    }
+
+    /**
+     * Move the scrollport to `top`, cooperating with the shell's tail-follow.
+     *
+     * While a response streams in, the shell re-parks the scrollport at the
+     * floor on every content growth. An animated scroll only starts on the next
+     * frame, so it is cancelled before it travels and the click looks dead.
+     * Park the row in the same task and release the tail, so the shell stops
+     * re-parking before the next chunk arrives.
+     */
+    function jumpToTop(scroller, top) {
+      if (!followingTail(scroller)) {
+        scrollToTop(scroller, top);
+        return;
+      }
+      scroller.scrollTop = top;
+      releaseTail(scroller);
+      holdTop(scroller, top, ++holdToken);
+    }
+
+    /**
+     * Keep the landing for a few frames: if a chunk still arrives first and the
+     * shell takes the tail back, park the row again and release it once more.
+     * Bounded on purpose — a reader scrolling right after the click wins, and a
+     * newer jump cancels the older guard through `holdToken`.
+     */
+    function holdTop(scroller, top, token) {
+      let frames = 0;
+      const tick = () => {
+        if (token !== holdToken) return;
+        frames += 1;
+        if (!scroller.isConnected) return;
+        if (Math.abs(scroller.scrollTop - top) > 1 && followingTail(scroller)) {
+          scroller.scrollTop = top;
+          releaseTail(scroller);
+        }
+        if (frames < 3) window.requestAnimationFrame(tick);
+      };
+      window.requestAnimationFrame(tick);
+    }
+
     /**
      * @returns {"moved"|"first"|"last"|"none"}
      *
@@ -401,7 +480,7 @@ window.__ModuleLoader__.load({
       }
 
       pendingJump = { index: target, until: Date.now() + PENDING_MS };
-      scrollToTop(scroller, top);
+      jumpToTop(scroller, top);
       notify();
       return "moved";
     }

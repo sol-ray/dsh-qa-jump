@@ -62,6 +62,7 @@ dsh plugin --profile web remove dsh-qa-jump
 - Injected through **Cordis Slots**: `conversation.input.dock` (the control row) and `conversation.chat.assistant-actions` (an invisible per-answer anchor, fallback only).
 - Positioning uses the shell’s stable DOM hooks: `[data-conversation-scroll]` (scrollport) and `[data-chat-flow-kind]` (row kind: `user` / `steering` / `assistant-step` / `turn-tail` …).
 - The answer axis is “the first `assistant-step` row after each user row”, so it lands on the reply’s start instead of the turn tail; the question axis uses `user` / `steering` rows.
+- **Jumps also work while the model is still writing**: in that state the shell follows the tail itself and re-parks the scrollport at the floor on every content growth, which cancels an animated scroll on its first frame. The plugin therefore parks the row synchronously and dispatches `scroll` / `scrollend` to hand the scrollport back to the reader (the shell uses exactly those two events to decide that a reader position settled), so later chunks no longer drag the view back down.
 - Code folding is **pure CSS**: one plugin-owned attribute on `<html>` clamps `[data-conversation-scroll] pre` to 156px, and `data-daj-code-open` lifts the clamp for one block. The message renderer is never rewritten.
 
 ## Compatibility and limitations
@@ -69,6 +70,7 @@ dsh plugin --profile web remove dsh-qa-jump
 - Developed against **DSH 0.2.1-rc.5** (Windows Desktop / Web GUI).
 - Depends on the DOM hooks above. If upstream renames the kinds, the answer axis falls back to the anchor mapping (coarser, still functional).
 - Folding targets the `<pre>` inside fenced blocks (`md-code-block`), keeping the language label and copy button.
+- While the shell follows the tail (during generation, or right after it while you sit at the bottom) a jump **teleports** instead of gliding: the shell’s re-park cancels the animation. Once you have scrolled up (the tail is released) jumps are smooth again.
 - Screenshots come from a real local run (DSH 0.2.1-rc.5, Windows desktop, dark theme) and cover the control row only; the effect of folding on long code blocks is not shown.
 
 ## Release

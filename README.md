@@ -62,6 +62,7 @@ dsh plugin --profile web remove dsh-qa-jump
 - 通过 **Cordis Slot** 注入两处：`conversation.input.dock`（控制行，加性槽位）与 `conversation.chat.assistant-actions`（每条已完成回答的隐形锚点，仅作兜底）。
 - 定位基于会话外壳的稳定 DOM 钩子：`[data-conversation-scroll]`（滚动口）、`[data-chat-flow-kind]`（每条 Chat 行的 kind：`user` / `steering` / `assistant-step` / `turn-tail` …）。
 - 回答轴取“每条用户行之后的第一条 `assistant-step` 行”，因此落到回答开头，而不是 turn 尾部；提问轴取 `user` / `steering` 行。
+- **流式生成期间照样能跳**：这时外壳自己在“跟随底部”，每次内容增长都会把滚动口钉回底部，动画滚动在起步那一帧就被取消。插件因此改为**同步落位**，再派发 `scroll` / `scrollend` 把滚动口交还给读者（外壳就是靠这两个事件判定“读者已经停在这里”），之后到来的流式内容不会再把你拽回底部。
 - 代码折叠是**纯 CSS**：`<html>` 上一个插件自有属性把 `[data-conversation-scroll] pre` 压到 156px，单块用 `data-daj-code-open` 抬起；不改消息渲染器、不插入节点。
 
 ## 兼容性与已知限制
@@ -69,7 +70,8 @@ dsh plugin --profile web remove dsh-qa-jump
 - 在 **DSH 0.2.1-rc.5（Windows Desktop / Web GUI）** 上开发。
 - 依赖上述 DOM 钩子；上游若重命名 kind，回答轴会退回锚点映射（仍可用，但粒度变粗），其余功能不受影响。
 - 代码折叠作用于围栏代码块内部的 `<pre>`（`md-code-block` 内），语言标签与复制按钮保留。
-- 流式输出期间新回答尚未产生 `assistant-step` 末尾动作行也不影响提问轴；回答轴按 flow 行即时计算，流式中即可跳。
+- 流式输出期间新回答尚未产生 `assistant-step` 末尾动作行也不影响提问轴；回答轴按 flow 行即时计算。
+- 外壳“跟随底部”期间（生成中，或刚生成完停在底部），跳转是**瞬移**而不是滑行：滑行动画会被外壳的钉底立刻取消。滚上去以后（跟随已交还）仍然是平滑滚动。
 - 截图取自本机实际运行（DSH 0.2.1-rc.5 / Windows 桌面端、深色主题），只覆盖控件行本身；代码块折叠对正文的效果未截图。
 
 ## 开发
